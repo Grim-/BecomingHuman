@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ResearchProjectDef>
+     <defName>XenotypeDetection</defName>
+    <label>Xenotype Detection</label>
+     <description>Xenotype Detection.</description>
+     <baseCost>5000</baseCost>
+     <techLevel>Spacer</techLevel>
+     <researchViewX>7</researchViewX>
+     <researchViewY>3</researchViewY>
+   </ResearchProjectDef>
+
+   <JobDef>
+       <defName>DXD_DetectXenotype</defName>
+       <driverClass>BecomingHuman.JobDriver_DetectXenotype</driverClass>
+       <reportString>detecting xenotype of TargetA.</reportString>
+   </JobDef>
+
+
+   <SoundDef>
+     <defName>DetectBeep</defName>
+     <maxVoices>1</maxVoices>
+     <maxSimultaneous>1</maxSimultaneous>
+     <subSounds>
+       <li>
+         <onCamera>True</onCamera>
+         <grains>
+           <li Class="AudioGrain_Clip">
+             <clipPath>scanning_beep</clipPath>
+           </li>
+         </grains>
+         <volumeRange>40</volumeRange>
+       </li>
+     </subSounds>
+   </SoundDef>
+</Defs>
