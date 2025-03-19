@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace BecomingHuman
 {
@@ -11,31 +12,50 @@ namespace BecomingHuman
         public static BecomingHumanSettings settings;
         private Vector2 scrollPosition = Vector2.zero;
         private string searchText = "";
-        private string multiplierBuffer;
+        private string arrestMultiplierBuffer;
+        private string resistanceThresholdBuffer;
 
-        private List<XenotypeDef> _AllXenotypeDefs;
+        private List<XenotypeDef> _allXenotypeDefs;
         private List<XenotypeDef> AllXenotypeDefs
         {
             get
             {
-                if (_AllXenotypeDefs == null)
+                if (_allXenotypeDefs == null)
                 {
-                    _AllXenotypeDefs = DefDatabase<XenotypeDef>.AllDefs
+                    _allXenotypeDefs = DefDatabase<XenotypeDef>.AllDefs
                         .OrderBy(x => x.label)
                         .ToList();
                 }
-                return _AllXenotypeDefs;
+                return _allXenotypeDefs;
             }
         }
 
         public BecomingHumanMod(ModContentPack content) : base(content)
         {
             settings = GetSettings<BecomingHumanSettings>();
-            multiplierBuffer = settings.arrestToDetectionMultiplier.ToString("F2");
+            arrestMultiplierBuffer = settings.arrestToDetectionMultiplier.ToString("F2");
+            resistanceThresholdBuffer = settings.resistanceDetectionThreshold.ToString("F2");
 
-            LongEventHandler.QueueLongEvent(() => {
-                SyncSettingsWithGameComponent();
-            }, "BecomingHuman_InitializeSettings", false, null);
+            LongEventHandler.QueueLongEvent(SyncSettingsWithGameComponent, "BecomingHuman_InitializeSettings", false, null);
+        }
+
+        public override void DoSettingsWindowContents(Rect inRect)
+        {
+            DrawTitle(ref inRect);
+            DrawArrestMultiplier(ref inRect);
+            DrawResistanceThreshold(ref inRect);
+            DrawXenotypeHeader(ref inRect);
+            DrawSearchBox(ref inRect);
+            DrawSelectionButtons(ref inRect);
+            DrawXenotypeList(inRect);
+        }
+
+        public override string SettingsCategory() => "BecomingHuman.ModSettingsLabel".Translate();
+
+        public override void WriteSettings()
+        {
+            base.WriteSettings();
+            SyncSettingsWithGameComponent();
         }
 
         private void SyncSettingsWithGameComponent()
@@ -54,72 +74,122 @@ namespace BecomingHuman
             }
         }
 
-        public override void DoSettingsWindowContents(Rect inRect)
+        private void DrawTitle(ref Rect inRect)
         {
-            Rect titleRect = inRect.TopPartPixels(30f);
-            Text.Font = GameFont.Medium;
-            Widgets.Label(titleRect, "Becoming Human Settings");
-            Text.Font = GameFont.Small;
+            //Rect titleRect = inRect.TopPartPixels(30f);
+            //Text.Font = GameFont.Medium;
+            //Widgets.Label(titleRect, "BecomingHuman.SettingsTitle".Translate());
+            //Text.Font = GameFont.Small;
+            //inRect.yMin += 40f;
+        }
 
-            inRect.yMin += 40f;
-
+        private void DrawArrestMultiplier(ref Rect inRect)
+        {
             Rect multiplierRect = new Rect(inRect.x, inRect.y, inRect.width, 28f);
-            Rect multiplierLabelRect = multiplierRect.LeftPartPixels(300f);
-            Widgets.Label(multiplierLabelRect, "Arrest to Detection Multiplier:");
+            Rect labelRect = multiplierRect.LeftPartPixels(300f);
+            Widgets.Label(labelRect, "BecomingHuman.ArrestMultiplierLabel".Translate());
 
-            Rect multiplierFieldRect = new Rect(multiplierLabelRect.xMax + 10f, multiplierRect.y, 80f, multiplierRect.height);
-            Widgets.TextFieldNumeric(multiplierFieldRect, ref settings.arrestToDetectionMultiplier, ref multiplierBuffer, 0.1f, 10f);
+            Rect fieldRect = new Rect(labelRect.xMax + 10f, multiplierRect.y, 80f, multiplierRect.height);
+            Widgets.TextFieldNumeric(fieldRect, ref settings.arrestToDetectionMultiplier, ref arrestMultiplierBuffer, 0.1f, 10f);
+            TooltipHandler.TipRegion(new Rect(inRect.x, inRect.y, inRect.width, 28f),
+                "BecomingHuman.ArrestMultiplierTooltip".Translate());
 
             inRect.yMin += 40f;
+        }
 
-            Rect xenoHeaderRect = new Rect(inRect.x, inRect.y, inRect.width, 28f);
+        private void DrawResistanceThreshold(ref Rect inRect)
+        {
+            Rect thresholdRect = new Rect(inRect.x, inRect.y, inRect.width, 28f);
+            Rect labelRect = thresholdRect.LeftPartPixels(300f);
+            Widgets.Label(labelRect, "BecomingHuman.ResistanceThresholdLabel".Translate());
+
+            Rect fieldRect = new Rect(labelRect.xMax + 10f, thresholdRect.y, 80f, thresholdRect.height);
+            Widgets.TextFieldNumeric(fieldRect, ref settings.resistanceDetectionThreshold, ref resistanceThresholdBuffer, 0, 10f);
+            TooltipHandler.TipRegion(new Rect(inRect.x, inRect.y, inRect.width, 28f),
+                "BecomingHuman.ResistanceThresholdTooltip".Translate());
+
+            inRect.yMin += 40f;
+        }
+
+        private void DrawXenotypeHeader(ref Rect inRect)
+        {
+            Rect headerRect = new Rect(inRect.x, inRect.y, inRect.width, 28f);
             Text.Font = GameFont.Medium;
-            Widgets.Label(xenoHeaderRect, "Xenotype Whitelist");
+            Widgets.Label(headerRect, "BecomingHuman.XenotypeWhitelistLabel".Translate());
+            TooltipHandler.TipRegion(headerRect,
+                "BecomingHuman.XenotypeWhitelistTooltip".Translate());
             Text.Font = GameFont.Small;
-
             inRect.yMin += 35f;
+        }
 
+        private void DrawSearchBox(ref Rect inRect)
+        {
             Rect searchRect = new Rect(inRect.x, inRect.y, inRect.width, 28f);
-            Widgets.Label(searchRect.LeftPartPixels(80f), "Search:");
+            Widgets.Label(searchRect.LeftPartPixels(80f), "BecomingHuman.SearchLabel".Translate());
             searchText = Widgets.TextField(searchRect.RightPartPixels(inRect.width - 85f), searchText);
-
+            TooltipHandler.TipRegion(searchRect, "BecomingHuman.SearchTooltip".Translate());
             inRect.yMin += 35f;
+        }
 
+        private void DrawSelectionButtons(ref Rect inRect)
+        {
             Rect buttonsRect = new Rect(inRect.x, inRect.y, inRect.width, 28f);
-            if (Widgets.ButtonText(buttonsRect.LeftHalf(), "Select All"))
+            Rect selectAllRect = buttonsRect.LeftHalf();
+            Rect selectNoneRect = buttonsRect.RightHalf();
+
+            if (Widgets.ButtonText(selectAllRect, "BecomingHuman.SelectAllLabel".Translate()))
+            {
+                SelectAllXenotypes();
+            }
+            TooltipHandler.TipRegion(selectAllRect, "BecomingHuman.SelectAllTooltip".Translate());
+
+            if (Widgets.ButtonText(selectNoneRect, "BecomingHuman.SelectNoneLabel".Translate()))
             {
                 settings.whitelistedPawnKindDefNames.Clear();
-                foreach (XenotypeDef def in AllXenotypeDefs)
-                {
-                    settings.whitelistedPawnKindDefNames.Add(def.defName);
-                }
             }
-            if (Widgets.ButtonText(buttonsRect.RightHalf(), "Select None"))
-            {
-                settings.whitelistedPawnKindDefNames.Clear();
-            }
+            TooltipHandler.TipRegion(selectNoneRect, "BecomingHuman.SelectNoneTooltip".Translate());
 
             inRect.yMin += 35f;
+        }
 
-            Rect outRect = inRect;
-
-            var filteredDefs = AllXenotypeDefs;
-            if (!string.IsNullOrEmpty(searchText))
+        private void SelectAllXenotypes()
+        {
+            settings.whitelistedPawnKindDefNames.Clear();
+            foreach (XenotypeDef def in AllXenotypeDefs)
             {
-                string search = searchText.ToLower();
-                filteredDefs = AllXenotypeDefs
-                    .Where(def => def.label.ToLower().Contains(search) || def.defName.ToLower().Contains(search))
-                    .ToList();
+                settings.whitelistedPawnKindDefNames.Add(def.defName);
+            }
+        }
+
+        private void DrawXenotypeList(Rect inRect)
+        {
+            List<XenotypeDef> filteredDefs = FilterXenotypes();
+            float viewHeight = filteredDefs.Count * 30f;
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
+
+            Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
+            DrawXenotypeRows(filteredDefs, viewRect);
+            Widgets.EndScrollView();
+        }
+
+        private List<XenotypeDef> FilterXenotypes()
+        {
+            if (string.IsNullOrEmpty(searchText))
+            {
+                return AllXenotypeDefs;
             }
 
-            float viewHeight = filteredDefs.Count * 30f;
-            Rect viewRect = new Rect(0f, 0f, outRect.width - 20f, viewHeight);
+            string search = searchText.ToLower();
+            return AllXenotypeDefs
+                .Where(def => def.label.ToLower().Contains(search) || def.defName.ToLower().Contains(search))
+                .ToList();
+        }
 
-            Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
-
+        private void DrawXenotypeRows(List<XenotypeDef> xenotypes, Rect viewRect)
+        {
             float curY = 0f;
 
-            foreach (XenotypeDef def in filteredDefs)
+            foreach (XenotypeDef def in xenotypes)
             {
                 Rect rowRect = new Rect(0f, curY, viewRect.width, 30f);
                 if (curY % 60f < 30f)
@@ -128,45 +198,45 @@ namespace BecomingHuman
                 }
 
                 bool isWhitelisted = settings.whitelistedPawnKindDefNames.Contains(def.defName);
-
-                Rect iconRect = new Rect(5f, curY, 30f, 30f);
-                Rect checkboxRect = new Rect(40f, curY, viewRect.width - 45f, 30f);
-
-                if (def.Icon != null)
-                {
-                    GUI.DrawTexture(iconRect, def.Icon);
-                }
-
-                bool newChecked = isWhitelisted;
-                Widgets.CheckboxLabeled(checkboxRect, $"{def.label} ({def.defName})", ref newChecked);
-
-                if (newChecked != isWhitelisted)
-                {
-                    if (newChecked)
-                    {
-                        settings.whitelistedPawnKindDefNames.Add(def.defName);
-                    }
-                    else
-                    {
-                        settings.whitelistedPawnKindDefNames.Remove(def.defName);
-                    }
-                }
-
+                DrawXenotypeRow(def, curY, viewRect.width, isWhitelisted);
                 curY += 30f;
             }
-
-            Widgets.EndScrollView();
         }
 
-        public override string SettingsCategory()
+        private void DrawXenotypeRow(XenotypeDef def, float y, float width, bool isWhitelisted)
         {
-            return "Becoming Human";
-        }
+            Rect rowRect = new Rect(0f, y, width, 30f);
+            Rect iconRect = new Rect(5f, y, 30f, 30f);
+            Rect checkboxRect = new Rect(40f, y, width - 45f, 30f);
 
-        public override void WriteSettings()
-        {
-            base.WriteSettings();
-            SyncSettingsWithGameComponent();
+            if (def.Icon != null)
+            {
+                GUI.DrawTexture(iconRect, def.Icon);
+            }
+
+            bool newChecked = isWhitelisted;
+            Widgets.CheckboxLabeled(checkboxRect, $"{def.label} ({def.defName})", ref newChecked);
+
+            if (newChecked != isWhitelisted)
+            {
+                if (newChecked)
+                {
+                    settings.whitelistedPawnKindDefNames.Add(def.defName);
+                }
+                else
+                {
+                    settings.whitelistedPawnKindDefNames.Remove(def.defName);
+                }
+            }
+
+            // Generate tooltip text based on xenotype description if available
+            string tooltipText = def.description;
+            if (string.IsNullOrEmpty(tooltipText))
+            {
+                tooltipText = $"Toggle detection for {def.label} xenotype";
+            }
+
+            TooltipHandler.TipRegion(rowRect, tooltipText);
         }
     }
 }

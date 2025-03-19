@@ -8,6 +8,9 @@
      <techLevel>Spacer</techLevel>
      <researchViewX>7</researchViewX>
      <researchViewY>3</researchViewY>
+     <prerequisites>
+       <li>Xenogermination</li>
+     </prerequisites>
    </ResearchProjectDef>
 
    <JobDef>
@@ -29,8 +32,23 @@
              <clipPath>scanning_beep</clipPath>
            </li>
          </grains>
-         <volumeRange>40</volumeRange>
+         <volumeRange>15</volumeRange>
        </li>
      </subSounds>
    </SoundDef>
+
+
+   <EffecterDef>
+     <defName>DetectScan</defName>
+     <children>
+       <li>
+         <subEffecterClass>SubEffecter_SprayerChance</subEffecterClass>
+         <positionRadius>0</positionRadius>
+         <moteDef>Mote_RipscannerHeadGlow</moteDef>
+         <chancePerTick>0.1</chancePerTick>
+         <spawnLocType>OnTarget</spawnLocType>
+         <positionOffset>(0, 5, 0)</positionOffset>
+       </li>
+     </children>
+   </EffecterDef>
 </Defs>

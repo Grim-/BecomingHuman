@@ -29,31 +29,31 @@ namespace BecomingHuman
             [HarmonyPostfix]
             public static IEnumerable<FloatMenuOption> Postfix(IEnumerable<FloatMenuOption> __result, Pawn __instance, Pawn selPawn)
             {
-                // Return all original options first
+                Pawn detectorPawn = selPawn;
+                Pawn targetPawn = __instance;
+
+
                 foreach (FloatMenuOption option in __result)
                 {
                     yield return option;
                 }
 
-                // Add Xenotype detection option if conditions are met
                 XenotypeDiscoveryTracker tracker = Current.Game.GetComponent<XenotypeDiscoveryTracker>();
-                if (tracker != null && tracker.HasResearch && __instance.genes?.Xenotype != null && !tracker.IsXenotypeDiscovered(__instance))
+                if (tracker != null && tracker.HasResearch && targetPawn.genes?.Xenotype != null && !tracker.IsXenotypeDiscovered(targetPawn))
                 {
-                    // Create option only if the selected pawn is capable
-                    if (!selPawn.Downed && !selPawn.InMentalState)
+                    if (!detectorPawn.Downed && !detectorPawn.InMentalState)
                     {
-                        if (XenotypeDiscoveryUtility.CanAttemptXenotypeDiscovery(selPawn, __instance))
+                        if (XenotypeDiscoveryUtility.CanAttemptXenotypeDiscovery(detectorPawn, targetPawn))
                         {
-                            yield return new FloatMenuOption("Detect xenotype", delegate ()
+                            yield return new FloatMenuOption("BecomingHuman.FloatMenu".Translate(Mathf.Clamp(detectorPawn.GetDetectionChance() * 100f, 0, 100f)), delegate ()
                             {
-                                Job job = JobMaker.MakeJob(BecomeHumanDefOf.DXD_DetectXenotype, __instance);
+                                Job job = JobMaker.MakeJob(BecomeHumanDefOf.DXD_DetectXenotype, targetPawn);
                                 selPawn.jobs.TryTakeOrderedJob(job);
                             }, MenuOptionPriority.Default, null, null, 0f, null, null);
                         }
                         else
                         {
-                            // Option is disabled with explanation
-                            yield return new FloatMenuOption("Detect xenotype (cannot attempt detection)", null, MenuOptionPriority.Default, null, null, 0f, null, null);
+                            yield return new FloatMenuOption("BecomingHuman.CantStartDetection".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null);
                         }
                     }
                 }
@@ -277,7 +277,7 @@ namespace BecomingHuman
                                     sb.AppendLine(string.Concat(new string[]
                                     {
                                         "  - ",
-                                        "Hidden Hediff",
+                                        "????",
                                         ": ",
                                         (statOffsetFromList >= 0f) ? "+" : "",
                                         statOffsetFromList.ToStringPercent()
@@ -315,7 +315,7 @@ namespace BecomingHuman
                                     sb.AppendLine(string.Concat(new string[]
                                     {
                                         "  - ",
-                                        "Hidden Trait",
+                                        "????",
                                         ": ",
                                         (statOffsetFromList2 >= 0f) ? "+" : "",
                                         statOffsetFromList2.ToStringPercent()
@@ -342,7 +342,7 @@ namespace BecomingHuman
                                 else
                                 {
                                     // Hidden version
-                                    sb.AppendLine("  - Hidden Gene: " + ((statOffsetFromList3 >= 0f) ? "+" : "") + statOffsetFromList3.ToStringPercent());
+                                    sb.AppendLine("  - ???? Gene: " + ((statOffsetFromList3 >= 0f) ? "+" : "") + statOffsetFromList3.ToStringPercent());
                                 }
                             }
                         }
@@ -369,7 +369,7 @@ namespace BecomingHuman
                         }
                         else
                         {
-                            __result = "Unknown Xenotype";
+                            __result = "BecomingHuman.UndiscoveredLabel".Translate();
                             return false;
                         }
 
@@ -379,7 +379,7 @@ namespace BecomingHuman
             }
         }
 
-        // Patch the XenotypeIcon getter
+
         [HarmonyPatch(typeof(Pawn_GeneTracker), "get_XenotypeIcon")]
         public static class Patch_XenotypeIcon
         {
@@ -396,7 +396,7 @@ namespace BecomingHuman
                         }
                         else
                         {
-                            __result = BaseContent.BadTex;
+                            __result = BaseContent.ClearTex;
                             return false;
                         }
 
@@ -406,7 +406,7 @@ namespace BecomingHuman
             }
         }
 
-        // Patch the XenotypeDescShort getter
+
         [HarmonyPatch(typeof(Pawn_GeneTracker), "get_XenotypeDescShort")]
         public static class Patch_XenotypeDescShort
         {
@@ -417,7 +417,7 @@ namespace BecomingHuman
                     var tracker = Current.Game?.GetComponent<XenotypeDiscoveryTracker>();
                     if (tracker != null && !tracker.IsXenotypeDiscovered(__instance.pawn))
                     {
-                        __result = "This xenotype has not been discovered yet.";
+                        __result = "BecomingHuman.XenotypeDescriptionShort".Translate();
                         return false;
                     }
                 }
@@ -437,9 +437,7 @@ namespace BecomingHuman
             drawMyOpinionMethod = AccessTools.Method(typeof(SocialCardUtility), "DrawMyOpinion");
             drawHisOpinionMethod = AccessTools.Method(typeof(SocialCardUtility), "DrawHisOpinion");
 
-
-            Harmony harmony = new Harmony("rimworld.becominghuman.socialcard");
-
+            Harmony harmony = new Harmony("emo.becominghuman.socialcard");
 
             harmony.Patch(
                 drawMyOpinionMethod,

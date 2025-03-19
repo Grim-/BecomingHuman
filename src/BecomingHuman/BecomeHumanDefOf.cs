@@ -9,6 +9,10 @@ namespace BecomingHuman
         public static ResearchProjectDef XenotypeDetection;
         public static JobDef DXD_DetectXenotype;
 
+
+
+        public static EffecterDef DetectScan;
+
         public static SoundDef DetectBeep;
     }
 

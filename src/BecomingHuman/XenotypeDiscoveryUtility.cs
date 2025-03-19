@@ -1,4 +1,6 @@
-﻿using Verse;
+﻿using RimWorld;
+using UnityEngine;
+using Verse;
 
 namespace BecomingHuman
 {
@@ -26,8 +28,14 @@ namespace BecomingHuman
 
             return true;
         }
+
+        public static float GetDetectionChance(this Pawn detector)
+        {
+            float multiplier = BecomingHumanMod.settings.arrestToDetectionMultiplier;
+            float arrestChance = detector.GetStatValue(StatDefOf.ArrestSuccessChance);
+            float detectionChance = arrestChance * multiplier;
+
+            return Mathf.Clamp(detectionChance, 0, 100);
+        }
     }
-
-
-
 }

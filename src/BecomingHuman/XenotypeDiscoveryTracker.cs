@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -10,7 +11,8 @@ namespace BecomingHuman
         private Dictionary<Pawn, bool> discoveredData = new Dictionary<Pawn, bool>();
 
         public float arrestToDetectionMultiplier = 1.5f;
-
+        private List<Pawn> pawnKeys;
+        private List<bool> boolValues;
         public bool HasResearch => Current.Game.researchManager.GetProgress(BecomeHumanDefOf.XenotypeDetection) >= 1f;
 
         public XenotypeDiscoveryTracker(Game game) : base()
@@ -19,11 +21,20 @@ namespace BecomingHuman
 
         public override void ExposeData()
         {
-            Scribe_Collections.Look(ref discoveredData, "discoveredXenotypes", LookMode.Reference, LookMode.Value);
-            if (discoveredData == null)
+            base.ExposeData();
+
+            if (Scribe.mode == LoadSaveMode.Saving && discoveredData == null)
             {
                 discoveredData = new Dictionary<Pawn, bool>();
             }
+
+            Scribe_Collections.Look(
+                ref discoveredData,
+                "discoveredXenotypes",
+                LookMode.Reference,
+                LookMode.Value,
+                ref pawnKeys,
+                ref boolValues);
         }
 
 
@@ -37,21 +48,26 @@ namespace BecomingHuman
         }
 
         //
-        public bool CanBeDiscovered(Pawn pawn)
+        public bool CanBeDiscovered(Pawn discoverer, Pawn pawn)
         {
             if (!HasResearch)
             {
                 return false;
             }
 
+            //only broken prisoners can be discovered against their will
             if (pawn.GuestStatus == GuestStatus.Prisoner && pawn.guest.will <= 0)
             {
                 return true;
             }
+            //anything else the chance is determined by arrest x 1.5 
             else if (pawn.guest.GuestStatus != GuestStatus.Prisoner)
             {
-                float arrestChance = pawn.GetStatValue(StatDefOf.ArrestSuccessChance);
-                return Rand.Range(0, 1f) <= arrestChance * arrestToDetectionMultiplier;
+                float rolledValue = Rand.Range(0, 1f);
+                float detectionChance = discoverer.GetDetectionChance();
+                bool isDiscovered = rolledValue <= detectionChance;
+                Log.Message($"Rolled {rolledValue} detectionChance{detectionChance} IsDiscovered {isDiscovered}");
+                return isDiscovered;
             }
 
             return true;
@@ -69,9 +85,13 @@ namespace BecomingHuman
                 return true;
             }
 
+            if (pawn.Faction != null && pawn.Faction == Faction.OfPlayer)
+            {
+                return true;
+            }
+
             if (discoveredData.ContainsKey(pawn))
             {
-                Log.Message("adding pawn to discovered list");
                 return true;
             }
 

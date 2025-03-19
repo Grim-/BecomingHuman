@@ -20,7 +20,7 @@ namespace BecomingHuman
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-            this.FailOnDowned(TargetIndex.A);
+            //this.FailOnDowned(TargetIndex.A);
             this.FailOnAggroMentalState(TargetIndex.A);
 
      
@@ -43,7 +43,7 @@ namespace BecomingHuman
             detectXenotype.FailOn(() => !XenotypeDiscoveryUtility.CanAttemptXenotypeDiscovery(pawn, TargetPawn));
 
 
-            detectXenotype.WithEffect(() => EffecterDefOf.RipScannerHeadGlow, TargetIndex.A);
+            detectXenotype.WithEffect(() => BecomeHumanDefOf.DetectScan, TargetIndex.A);
 
 
             yield return detectXenotype;
@@ -51,14 +51,13 @@ namespace BecomingHuman
             Toil finalizeDetection = new Toil();
             finalizeDetection.initAction = () => {
                 XenotypeDiscoveryTracker tracker = Current.Game.GetComponent<XenotypeDiscoveryTracker>();
-                if (tracker != null && tracker.CanBeDiscovered(TargetPawn))
+                if (tracker != null && tracker.CanBeDiscovered(pawn, TargetPawn))
                 {
-                    Log.Message($"Attempting to discover xenotype for {TargetPawn.LabelShort}, before discovery status: {tracker.IsXenotypeDiscovered(TargetPawn)}");
+                    //Log.Message($"Attempting to discover xenotype for {TargetPawn.LabelShort}, before discovery status: {tracker.IsXenotypeDiscovered(TargetPawn)}");
                     tracker.DiscoverXenotype(TargetPawn);
                     if (!tracker.whiteListedXenotypes.Contains(TargetPawn.genes.Xenotype))
                     {
-                        Messages.Message("Xenotype of " + TargetPawn.LabelShort + " has been detected: " +
-                                        TargetPawn.genes.Xenotype.label,
+                        Messages.Message("BecomingHuman.DetectionMessage".Translate(TargetPawn.LabelShort, TargetPawn.genes.Xenotype.label),
                                         TargetPawn, MessageTypeDefOf.PositiveEvent);
                         BecomeHumanDefOf.DetectBeep.PlayOneShotOnCamera(TargetPawn.Map);
                     }
@@ -66,7 +65,7 @@ namespace BecomingHuman
                 }
                 else
                 {
-                    Messages.Message("Failed to detect xenotype of " + TargetPawn.LabelShort,
+                    Messages.Message("BecomingHuman.DetectionFailedMessage".Translate(TargetPawn.LabelShort),
                                     TargetPawn, MessageTypeDefOf.NeutralEvent);
                 }
             };

@@ -7,8 +7,9 @@ namespace BecomingHuman
     public class BecomingHumanSettings : ModSettings
     {
         public List<string> whitelistedPawnKindDefNames = new List<string>();
-        public float arrestToDetectionMultiplier = 1.5f;
-
+        public float arrestToDetectionMultiplier = 1.05f;
+        public float resistanceDetectionThreshold = 0;
+      
         public List<XenotypeDef> WhitelistedXenotypeDefs
         {
             get
@@ -30,7 +31,7 @@ namespace BecomingHuman
         {
             base.ExposeData();
             Scribe_Collections.Look(ref whitelistedPawnKindDefNames, "whitelistedPawnKindDefNames", LookMode.Value);
-            Scribe_Values.Look(ref arrestToDetectionMultiplier, "arrestToDetectionMultiplier", 1.5f);
+            Scribe_Values.Look(ref arrestToDetectionMultiplier, "arrestToDetectionMultiplier", 1.05f);
             if (whitelistedPawnKindDefNames == null)
             {
                 whitelistedPawnKindDefNames = new List<string>();

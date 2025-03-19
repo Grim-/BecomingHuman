@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <BecomingHuman.ModSettingsLabel>Becoming Human</BecomingHuman.ModSettingsLabel>
+
+  <!-- Existing language keys -->
+  <BecomingHuman.UndiscoveredLabel>????</BecomingHuman.UndiscoveredLabel>
+  <BecomingHuman.HiddenGene>Hidden gene</BecomingHuman.HiddenGene>
+  <BecomingHuman.DetectionMessage>Xenotype of {0} has been detected: {1}</BecomingHuman.DetectionMessage>
+  <BecomingHuman.DetectionFailedMessage>Failed to detect xenotype of {0}</BecomingHuman.DetectionFailedMessage>
+
+  <!-- Settings Window -->
+  <BecomingHuman.SettingsTitle>Becoming Human Settings</BecomingHuman.SettingsTitle>
+
+  <!-- Arrest Multiplier -->
+  <BecomingHuman.ArrestMultiplierLabel>Arrest to Detection Multiplier:</BecomingHuman.ArrestMultiplierLabel>
+  <BecomingHuman.ArrestMultiplierTooltip>Multiplier on Arrest Chance, used to determine detection score.</BecomingHuman.ArrestMultiplierTooltip>
+
+  <!-- Resistance Threshold -->
+  <BecomingHuman.ResistanceThresholdLabel>Resistance Detection Threshold:</BecomingHuman.ResistanceThresholdLabel>
+  <BecomingHuman.ResistanceThresholdTooltip>The resistance level required on non-wavering prisoners to forcibly detect their xenotype.</BecomingHuman.ResistanceThresholdTooltip>
+
+  <!-- Xenotype Whitelist -->
+  <BecomingHuman.XenotypeWhitelistLabel>Xenotype Whitelist</BecomingHuman.XenotypeWhitelistLabel>
+  <BecomingHuman.XenotypeWhitelistTooltip>Selected Xenotypes do not trigger a bleep when their Xenotype is successfully discovered</BecomingHuman.XenotypeWhitelistTooltip>
+  <BecomingHuman.XenotypeDescriptionShort>This pawn's xenotype has not been discovered yet.</BecomingHuman.XenotypeDescriptionShort>
+  <!-- Search Box -->
+  <BecomingHuman.SearchLabel>Search:</BecomingHuman.SearchLabel>
+  <BecomingHuman.SearchTooltip>Filter xenotypes by name or defName</BecomingHuman.SearchTooltip>
+
+  <!-- Selection Buttons -->
+  <BecomingHuman.SelectAllLabel>Select All</BecomingHuman.SelectAllLabel>
+  <BecomingHuman.SelectAllTooltip>Add all xenotypes to detection list</BecomingHuman.SelectAllTooltip>
+  <BecomingHuman.SelectNoneLabel>Select None</BecomingHuman.SelectNoneLabel>
+  <BecomingHuman.SelectNoneTooltip>Clear all xenotypes from detection list</BecomingHuman.SelectNoneTooltip>
+
+
+  <!-- Float menu -->
+  <BecomingHuman.FloatMenu>Detect Xenotype ({0}% chance)</BecomingHuman.FloatMenu>
+  <BecomingHuman.CantStartDetection>Cannot attempt detection.</BecomingHuman.CantStartDetection>
+</LanguageData>
